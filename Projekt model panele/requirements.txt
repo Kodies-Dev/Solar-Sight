@@ -1,0 +1,10 @@
+pandas
+numpy
+sklearn
+optuna
+xgboost
+seaborn
+matplotlib
+urllib3.exceptions
+datetime
+urllib3
