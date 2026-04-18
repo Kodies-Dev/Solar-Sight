@@ -20,6 +20,10 @@ try:
 except ImportError:
     solar_elevation_deg = None
 
+from pv_capacity_pl import get_capacity_mw
+
+POPULATION_PL = 37_800_000
+
 
 def merge_dataset(
     city: str = "Gliwice",
@@ -80,12 +84,24 @@ def merge_dataset(
 
     # Dopisz solar_elevation_deg jesli brakuje (np. gdy weather CSV pochodzi
     # ze starszej wersji class_weather_api.py sprzed dodania tej cechy).
+    cities = pd.read_csv(base / "miasta.csv")
+    city_row = cities.loc[cities["city"].str.lower() == city.lower()].iloc[0]
     if "solar_elevation_deg" not in merged.columns and solar_elevation_deg is not None:
-        cities = pd.read_csv(base / "miasta.csv")
-        row = cities.loc[cities["city"].str.lower() == city.lower()].iloc[0]
         merged["solar_elevation_deg"] = solar_elevation_deg(
-            merged["timestamp"], float(row["lat"]), float(row["lon"])
+            merged["timestamp"], float(city_row["lat"]), float(city_row["lon"])
         )
+
+    # Capacity normalization: dzielimy target przez moc PV przypisana do miasta
+    # (national capacity * population_share) zeby otrzymac capacity factor [0..~0.7],
+    # bezwymiarowy wskaznik wykorzystania mocy. Capacity factor zalezy od pogody
+    # i pory dnia/roku, ALE NIE od trendu wzrostu mocy zainstalowanej. Model
+    # uczony na CF jest stabilny w czasie. Przy inference: predicted_mwh =
+    # predicted_cf * (current_national_capacity_mw * population_share).
+    merged["installed_pv_mw_pl"] = get_capacity_mw(merged["timestamp"])
+    population_share = float(city_row["population"]) / POPULATION_PL
+    city_capacity_mw = merged["installed_pv_mw_pl"] * population_share
+    # 1h * MW = MWh, wiec capacity_factor = MWh_godz / MW_zainstalowane
+    merged["capacity_factor"] = merged["Produkcja_PV_Godz_MWh"] / city_capacity_mw
 
     merged.insert(1, "city", city)
 
