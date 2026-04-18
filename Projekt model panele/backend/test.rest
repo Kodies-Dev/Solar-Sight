@@ -1,5 +1,5 @@
 ### Variables
-@baseUrl = http://localhost:5000
+@baseUrl = http://localhost:5001
 @contentType = application/json
 
 ### Test 1: GET / - Server status

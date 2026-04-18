@@ -34,8 +34,8 @@ function PredictionModal({ city, onClose }) {
     >
       {city && (
         <>
-          <PredictionModalStats />
-          <PredictionModalChart />
+          <PredictionModalStats city={city} />
+          <PredictionModalChart city={city} />
         </>
       )}
     </Modal>
