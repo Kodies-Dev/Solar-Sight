@@ -17,7 +17,7 @@ app = Flask(__name__)
 def home():
     return jsonify({
         "status": "ok",
-        "message": "Aplikacja działa prawidłowo",
+        "message": "App working",
         "timestamp": datetime.now().isoformat(),
         "version": "1.0"
     }), 200
@@ -35,7 +35,7 @@ def analyze():
         
         return jsonify({
             "status": "success",
-            "message": "Analiza ukończona",
+            "message": "Analyze done",
             "data": wyniki_json,
             "count": len(wyniki_json),
             "timestamp": datetime.now().isoformat()
