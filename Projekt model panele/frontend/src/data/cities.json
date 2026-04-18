@@ -1,0 +1,10 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [18.6731, 50.2945] },
+            "properties": { "id": "gliwice", "name": "Gliwice" }
+        }
+    ]
+}
