@@ -10,7 +10,7 @@ from pathlib import Path
 # Add parent directory to sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from trained_model_usage.predicting_mwh import predykuj, _get_model
+from trained_model_usage.predicting_mwh import predykuj, symuluj, _get_model
 
 logging.basicConfig(
     level=logging.INFO,
@@ -84,6 +84,77 @@ def analyze():
 
     except Exception as e:
         app.logger.exception("Error during prediction")
+        return jsonify({
+            "status": "error",
+            "message": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 500
+
+
+@app.route('/simulate', methods=['POST'])
+def simulate():
+    payload = request.get_json(silent=True) or {}
+    city = request.args.get('city') or payload.get('city') or 'gliwice'
+    cloud_delta = payload.get('cloud_delta', request.args.get('cloud_delta', 0))
+
+    if not isinstance(city, str) or not city.strip():
+        return jsonify({
+            "status": "error",
+            "message": "Parameter 'city' must be a non-empty string",
+            "timestamp": datetime.now().isoformat()
+        }), 400
+
+    try:
+        cloud_delta = float(cloud_delta)
+    except (TypeError, ValueError):
+        return jsonify({
+            "status": "error",
+            "message": "Parameter 'cloud_delta' must be a number",
+            "timestamp": datetime.now().isoformat()
+        }), 400
+
+    if not -100.0 <= cloud_delta <= 100.0:
+        return jsonify({
+            "status": "error",
+            "message": "Parameter 'cloud_delta' must be in range [-100, 100]",
+            "timestamp": datetime.now().isoformat()
+        }), 400
+
+    city = city.strip()
+
+    try:
+        results = symuluj(city=city, cloud_delta=cloud_delta)
+        results['timestamp'] = results['timestamp'].astype(str)
+        results_json = results.to_dict(orient='records')
+
+        return jsonify({
+            "status": "success",
+            "message": "Simulation done",
+            "city": city,
+            "cloud_delta": cloud_delta,
+            "data": results_json,
+            "count": len(results_json),
+            "timestamp": datetime.now().isoformat()
+        }), 200
+
+    except ValueError as e:
+        app.logger.warning("Invalid input for /simulate: %s", e)
+        return jsonify({
+            "status": "error",
+            "message": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 400
+
+    except RuntimeError as e:
+        app.logger.warning("Upstream error (Open-Meteo): %s", e)
+        return jsonify({
+            "status": "error",
+            "message": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 502
+
+    except Exception as e:
+        app.logger.exception("Error during simulation")
         return jsonify({
             "status": "error",
             "message": str(e),

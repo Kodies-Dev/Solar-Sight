@@ -24,6 +24,32 @@ def _get_model():
     return joblib.load(PATH_MODEL)
 
 
+# Weather forecast cache — avoids re-hitting Open-Meteo on every slider tick
+_WEATHER_CACHE: dict = {}
+_WEATHER_CACHE_TTL_S = 900  # 15 minutes
+
+
+def _get_weather_df(city: str) -> pd.DataFrame:
+    cities = _load_cities()
+    city_key = city.lower()
+    if city_key not in cities:
+        available = [c.capitalize() for c in cities.keys()]
+        raise ValueError(f"Unknown city '{city}'. Available: {available}")
+
+    now_ts = datetime.now(timezone.utc).timestamp()
+    cached = _WEATHER_CACHE.get(city_key)
+    if cached and (now_ts - cached[1]) < _WEATHER_CACHE_TTL_S:
+        logger.info("Weather cache hit for %s (age: %.0fs)", city.capitalize(), now_ts - cached[1])
+        return cached[0].copy()
+
+    lat = cities[city_key]['lat']
+    lon = cities[city_key]['lon']
+    logger.info("Fetching weather forecast for %s (%s, %s)", city.capitalize(), lat, lon)
+    df = _fetch_forecast(lat, lon, hours=24)
+    _WEATHER_CACHE[city_key] = (df.copy(), now_ts)
+    return df
+
+
 # WMO weather interpretation codes — https://open-meteo.com/en/docs
 _WMO_STATUS = {
     0:  "Clear",
@@ -164,27 +190,9 @@ def _fetch_forecast(lat: float, lon: float, hours: int = 24) -> pd.DataFrame:
 
 def predykuj(city: str = "gliwice") -> pd.DataFrame:
 
-    cities = _load_cities()
-    city_key = city.lower()
-
-    if city_key not in cities:
-        available = [c.capitalize() for c in cities.keys()]
-        raise ValueError(f"Unknown city '{city}'. Available: {available}")
-
-    lat = cities[city_key]['lat']
-    lon = cities[city_key]['lon']
-
-    logger.info("City: %s (%s, %s)", city.capitalize(), lat, lon)
-
-    # load model (cached)
+    df = _get_weather_df(city)
     model = _get_model()
 
-    # fetch weather forecast
-    logger.info("Fetching weather forecast...")
-    df = _fetch_forecast(lat, lon, hours=24)
-    logger.info("Retrieved %d hours of data", len(df))
-
-    # fill missing columns
     required_features = list(model.feature_names_in_)
     for col in required_features:
         if col not in df.columns:
@@ -193,7 +201,6 @@ def predykuj(city: str = "gliwice") -> pd.DataFrame:
 
     X = df[required_features]
 
-    # prediction
     prediction = model.predict(X)
     prediction = np.maximum(0, prediction).round(3)
 
@@ -211,6 +218,54 @@ def predykuj(city: str = "gliwice") -> pd.DataFrame:
     })
 
     night_hours = [ 22, 23, 0, 1, 2, 3, ]
+    results.loc[results['hour'].isin(night_hours), 'predykcja_mwh'] = 0.0
+
+    results.sort_values(by='hour', ascending=True, inplace=True)
+
+    return results
+
+
+def symuluj(city: str = "gliwice", cloud_delta: float = 0.0) -> pd.DataFrame:
+    """Re-run prediction with cloud cover shifted by `cloud_delta` percentage points.
+
+    Automatically rescales shortwave & direct radiation to stay physically
+    consistent (more clouds → less radiation).
+    """
+    df = _get_weather_df(city)
+
+    base_cloud = df['cloud_cover_pct'].fillna(0).clip(0, 100)
+    new_cloud  = (base_cloud + cloud_delta).clip(0, 100)
+
+    # Radiation attenuation — empirical linear approximation.
+    # At 100% cloud cover, direct radiation drops by ~75%.
+    k = 0.75
+    base_factor = (1 - base_cloud / 100.0 * k).clip(lower=0.05)
+    new_factor  = (1 - new_cloud  / 100.0 * k).clip(lower=0.0)
+    ratio = new_factor / base_factor
+
+    df['cloud_cover_pct']         = new_cloud
+    df['shortwave_radiation_wm2'] = (df['shortwave_radiation_wm2'].fillna(0) * ratio).clip(lower=0)
+    df['direct_radiation_wm2']    = (df['direct_radiation_wm2'].fillna(0) * ratio).clip(lower=0)
+
+    model = _get_model()
+    required_features = list(model.feature_names_in_)
+    for col in required_features:
+        if col not in df.columns:
+            df[col] = 0.0
+
+    X = df[required_features]
+
+    prediction = model.predict(X)
+    prediction = np.maximum(0, prediction).round(3)
+
+    results = pd.DataFrame({
+        'timestamp':       df['timestamp'],
+        'hour':            df['hour'],
+        'predykcja_mwh':   prediction,
+        'cloud_cover_pct': new_cloud.astype(int),
+    })
+
+    night_hours = [22, 23, 0, 1, 2, 3]
     results.loc[results['hour'].isin(night_hours), 'predykcja_mwh'] = 0.0
 
     results.sort_values(by='hour', ascending=True, inplace=True)
