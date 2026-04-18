@@ -24,6 +24,39 @@ def _get_model():
     return joblib.load(PATH_MODEL)
 
 
+# WMO weather interpretation codes — https://open-meteo.com/en/docs
+_WMO_STATUS = {
+    0:  "Clear",
+    1:  "Mainly clear",
+    2:  "Partly cloudy",
+    3:  "Overcast",
+    45: "Fog",
+    48: "Depositing rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    56: "Light freezing drizzle",
+    57: "Dense freezing drizzle",
+    61: "Light rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    66: "Light freezing rain",
+    67: "Heavy freezing rain",
+    71: "Light snow",
+    73: "Moderate snow",
+    75: "Heavy snow",
+    77: "Snow grains",
+    80: "Light rain showers",
+    81: "Moderate rain showers",
+    82: "Violent rain showers",
+    85: "Light snow showers",
+    86: "Heavy snow showers",
+    95: "Thunderstorm",
+    96: "Thunderstorm with light hail",
+    99: "Thunderstorm with heavy hail",
+}
+
+
 
 
 def _load_cities() -> dict:
@@ -67,7 +100,7 @@ def _fetch_forecast(lat: float, lon: float, hours: int = 24) -> pd.DataFrame:
             "temperature_2m", "relative_humidity_2m", "surface_pressure",
             "cloud_cover", "wind_speed_10m", "uv_index",
             "shortwave_radiation", "direct_radiation", "diffuse_radiation",
-            "sunshine_duration",
+            "sunshine_duration", "weather_code",
         ]),
         "start_hour": start.strftime("%Y-%m-%dT%H:%M"),
         "end_hour":   end.strftime("%Y-%m-%dT%H:%M"),
@@ -93,6 +126,7 @@ def _fetch_forecast(lat: float, lon: float, hours: int = 24) -> pd.DataFrame:
         "direct_radiation_wm2":    hourly.get("direct_radiation"),
         "diffuse_radiation_wm2":   hourly.get("diffuse_radiation"),
         "sunshine_duration_s":     hourly.get("sunshine_duration"),
+        "weather_code":            hourly.get("weather_code"),
     })
 
     # sunshine seconds
@@ -163,14 +197,22 @@ def predykuj(city: str = "gliwice") -> pd.DataFrame:
     prediction = model.predict(X)
     prediction = np.maximum(0, prediction).round(3)
 
+    weather_code = df['weather_code'].fillna(0).astype(int)
+
     results = pd.DataFrame({
-        'timestamp':     df['timestamp'],
-        'hour':          df['hour'],
-        'predykcja_mwh': prediction
+        'timestamp':       df['timestamp'],
+        'hour':            df['hour'],
+        'predykcja_mwh':   prediction,
+        'temperature_c':   df['temperature_c'].round(1),
+        'uv_index':        df['uv_index'],
+        'cloud_cover_pct': df['cloud_cover_pct'].fillna(0).astype(int),
+        'weather_code':    weather_code,
+        'status':          weather_code.map(_WMO_STATUS).fillna("Unknown"),
     })
+
+    night_hours = [ 22, 23, 0, 1, 2, 3, ]
+    results.loc[results['hour'].isin(night_hours), 'predykcja_mwh'] = 0.0
 
     results.sort_values(by='hour', ascending=True, inplace=True)
 
     return results
-
-
