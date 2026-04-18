@@ -1,4 +1,12 @@
 .chartContainer {
-    height: 160px;
+    height: 200px;
     margin-top: 12px;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 500;
+    color: #888;
+    letter-spacing: 0.06em;
+    margin: 0 0 8px;
 }

@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import styles from './Map.module.css'
 import citiesData from '../../data/cities.json'
 
-const MAPBOX_ACCESS_TOKEN = import.meta.env.MAPBOX_ACCESS_TOKEN;
+const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
 function Map({ onCityClick }) {
   const mapRef = useRef(null);
@@ -17,7 +17,12 @@ useEffect(() => {
     container: mapContainerRef.current,
     style: 'mapbox://styles/mapbox/standard',
     center: [18.67796034218694, 50.28883369377393],
-    zoom: 8
+    zoom: 8,
+    minZoom: 6,
+    maxBounds: [
+      [13.8, 48.9],
+      [24.2, 55.0]
+    ]
   })
 
   mapRef.current.on('load', () => {
