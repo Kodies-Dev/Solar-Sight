@@ -15,7 +15,7 @@ Użycie:
 
 import argparse
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
@@ -35,6 +35,12 @@ def load_city(city: str) -> dict:
 
 
 def fetch_meteo(lat: float, lon: float, hours: int) -> pd.DataFrame:
+    # Wyrownanie zakresu z Google Weather (rolling window od biezacej godziny):
+    # prosimy Open-Meteo o dokladnie te same N godzin, zaczynajac od biezacej
+    # pelnej godziny UTC. Dzieki temu merge w merge_forecasts.py nie gubi danych.
+    start_hour = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+    end_hour = start_hour + timedelta(hours=hours - 1)
+
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": lat,
@@ -52,12 +58,14 @@ def fetch_meteo(lat: float, lon: float, hours: int) -> pd.DataFrame:
             "direct_normal_irradiance",  # DNI (nie używane przez model, referencja)
             "sunshine_duration",
         ]),
-        "forecast_days": max(1, (hours // 24) + 1),
+        "start_hour": start_hour.strftime("%Y-%m-%dT%H:%M"),
+        "end_hour": end_hour.strftime("%Y-%m-%dT%H:%M"),
         # UTC — spójne z danymi treningowymi (pipeline używa timezone=UTC)
         "timezone": "UTC",
     }
 
-    print(f"Pobieranie {hours}h prognozy z Open-Meteo ({lat}, {lon})...")
+    print(f"Pobieranie {hours}h prognozy z Open-Meteo ({lat}, {lon})"
+          f" [{start_hour:%Y-%m-%d %H:%M} -> {end_hour:%Y-%m-%d %H:%M} UTC]...")
     r = requests.get(url, params=params, timeout=30)
     if r.status_code != 200:
         print(f"BŁĄD {r.status_code}: {r.text[:500]}")
@@ -85,7 +93,7 @@ def fetch_meteo(lat: float, lon: float, hours: int) -> pd.DataFrame:
     })
 
     df["sunshine_pct"] = (df["sunshine_duration_s"] / 3600 * 100).clip(0, 100).round(1)
-    df = df.drop(columns=["sunshine_duration_s"]).head(hours)
+    df = df.drop(columns=["sunshine_duration_s"])
 
     print(f"Pobrano {len(df)} rekordów")
     return df

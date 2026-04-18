@@ -24,8 +24,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-CITIES_CSV = Path(__file__).parent.parent / "pipeline" / "miasta.csv"
+PROJECT_ROOT = Path(__file__).parent.parent
+PIPELINE_DIR = PROJECT_ROOT / "pipeline"
+CITIES_CSV = PIPELINE_DIR / "miasta.csv"
 DEFAULT_CITY = "Gliwice"
+
+# Import tabeli mocy krajowej PL z pipeline
+sys.path.insert(0, str(PIPELINE_DIR))
+from pv_capacity_pl import PV_CAPACITY_PL_MW, get_capacity_mw
 
 # Kolumny pogodowe gdzie Google jest primary, Meteo jest fallback
 _WEATHER_COLS = [
@@ -44,7 +50,9 @@ _SOLAR_COLS = [
     "sunshine_pct",
 ]
 
-# Finalny porządek kolumn zgodny ze schematem treningowym
+# Finalny porządek kolumn zgodny ze schematem treningowym (bez targetu i pochodnych)
+# Model przewiduje `capacity_factor`, który mnożymy przez `installed_pv_mw_pl * population_share`
+# aby otrzymać MWh dla miasta.
 _OUTPUT_COLS = [
     "timestamp", "date", "hour", "day_of_year", "month",
     "hour_sin", "hour_cos", "doy_sin", "doy_cos",
@@ -52,7 +60,29 @@ _OUTPUT_COLS = [
     "cloud_cover_pct", "sunshine_pct",
     "temperature_c", "wind_speed_ms", "humidity_pct", "pressure_hpa",
     "solar_elevation_deg",
+    "installed_pv_mw_pl",
 ]
+
+
+def installed_capacity_mw(timestamps_utc: pd.Series) -> pd.Series:
+    """Moc zainstalowana PL dla prognozy.
+
+    Dla timestampow poza zakresem PV_CAPACITY_PL_MW (prognoza zwykle dotyczy
+    przyszlosci, a slownik koncy sie na ostatnim zaraportowanym miesiacu)
+    uzywamy ostatniej znanej wartosci. W produkcji nalezy okresowo uzupelniac
+    pv_capacity_pl.py o nowe miesiace z URE/PSE.
+    """
+    capacity = get_capacity_mw(timestamps_utc)
+    missing = capacity.isna().sum()
+    if missing:
+        last_key = max(PV_CAPACITY_PL_MW.keys())
+        last_value = PV_CAPACITY_PL_MW[last_key]
+        print(f"  UWAGA: {missing} godzin poza zakresem pv_capacity_pl.py "
+              f"- uzywam ostatniej znanej wartosci {last_value} MW "
+              f"(koniec {last_key[0]}-{last_key[1]:02d}). "
+              f"Uzupelnij slownik dla aktualnych prognoz.")
+        capacity = capacity.fillna(last_value)
+    return capacity
 
 
 def load_city(city: str) -> dict:
@@ -161,6 +191,9 @@ def main():
     city_info = load_city(args.city)
     ts_utc = pd.to_datetime(df["timestamp"], utc=True)
     df["solar_elevation_deg"] = solar_elevation_deg(ts_utc, float(city_info["lat"]), float(city_info["lon"]))
+
+    # Dodaj krajowa moc PV (feature modelu) — spojne z pipeline treningowym
+    df["installed_pv_mw_pl"] = installed_capacity_mw(ts_utc)
 
     # Zachowaj tylko kolumny wyjściowe zgodne ze schematem treningowym
     df = df[[c for c in _OUTPUT_COLS if c in df.columns]]
