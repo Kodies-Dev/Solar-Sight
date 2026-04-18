@@ -27,8 +27,8 @@ PV_COLUMN = "solar"
 POPULATION_PL = 37_800_000
 CITIES_CSV = "miasta.csv"
 DEFAULT_CITY = "Gliwice"
-DEFAULT_START_DATE = date(2023, 1, 1)
-DEFAULT_END_DATE = date(2025, 12, 31)
+DEFAULT_START_DATE = date(2026, 4, 16)
+DEFAULT_END_DATE = date(2026, 4, 18)
 
 
 def format_api_datetime(value: date, end_of_day: bool) -> str:
