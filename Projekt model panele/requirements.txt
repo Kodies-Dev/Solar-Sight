@@ -1,10 +1,11 @@
 pandas
 numpy
-sklearn
+scikit-learn
 optuna
 xgboost
 seaborn
 matplotlib
-urllib3.exceptions
-datetime
+requests
 urllib3
+python-dotenv
+joblib

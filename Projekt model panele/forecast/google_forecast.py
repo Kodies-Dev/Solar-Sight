@@ -21,9 +21,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import requests
+from dotenv import load_dotenv
 
-CITIES_CSV = Path(__file__).parent.parent / "pipeline" / "miasta.csv"
+PROJECT_ROOT = Path(__file__).parent.parent
+CITIES_CSV = PROJECT_ROOT / "pipeline" / "miasta.csv"
 DEFAULT_CITY = "Gliwice"
+
+# Wczytaj .env z korzenia projektu (jesli istnieje)
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 def load_city(city: str) -> dict:
