@@ -95,7 +95,7 @@ def analyze():
 def simulate():
     payload = request.get_json(silent=True) or {}
     city = request.args.get('city') or payload.get('city') or 'gliwice'
-    cloud_delta = payload.get('cloud_delta', request.args.get('cloud_delta', 0))
+    cloud_cover = payload.get('cloud_cover', request.args.get('cloud_cover', 0))
 
     if not isinstance(city, str) or not city.strip():
         return jsonify({
@@ -105,25 +105,25 @@ def simulate():
         }), 400
 
     try:
-        cloud_delta = float(cloud_delta)
+        cloud_cover = float(cloud_cover)
     except (TypeError, ValueError):
         return jsonify({
             "status": "error",
-            "message": "Parameter 'cloud_delta' must be a number",
+            "message": "Parameter 'cloud_cover' must be a number",
             "timestamp": datetime.now().isoformat()
         }), 400
 
-    if not -100.0 <= cloud_delta <= 100.0:
+    if not 0.0 <= cloud_cover <= 100.0:
         return jsonify({
             "status": "error",
-            "message": "Parameter 'cloud_delta' must be in range [-100, 100]",
+            "message": "Parameter 'cloud_cover' must be in range [0, 100]",
             "timestamp": datetime.now().isoformat()
         }), 400
 
     city = city.strip()
 
     try:
-        results = symuluj(city=city, cloud_delta=cloud_delta)
+        results = symuluj(city=city, cloud_cover=cloud_cover)
         results['timestamp'] = results['timestamp'].astype(str)
         results_json = results.to_dict(orient='records')
 
@@ -131,7 +131,7 @@ def simulate():
             "status": "success",
             "message": "Simulation done",
             "city": city,
-            "cloud_delta": cloud_delta,
+            "cloud_cover": cloud_cover,
             "data": results_json,
             "count": len(results_json),
             "timestamp": datetime.now().isoformat()

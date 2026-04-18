@@ -225,8 +225,8 @@ def predykuj(city: str = "gliwice") -> pd.DataFrame:
     return results
 
 
-def symuluj(city: str = "gliwice", cloud_delta: float = 0.0) -> pd.DataFrame:
-    """Re-run prediction with cloud cover shifted by `cloud_delta` percentage points.
+def symuluj(city: str = "gliwice", cloud_cover: float = 0.0) -> pd.DataFrame:
+    """Re-run prediction with cloud cover forced to an absolute value [0, 100].
 
     Automatically rescales shortwave & direct radiation to stay physically
     consistent (more clouds → less radiation).
@@ -234,7 +234,7 @@ def symuluj(city: str = "gliwice", cloud_delta: float = 0.0) -> pd.DataFrame:
     df = _get_weather_df(city)
 
     base_cloud = df['cloud_cover_pct'].fillna(0).clip(0, 100)
-    new_cloud  = (base_cloud + cloud_delta).clip(0, 100)
+    new_cloud  = pd.Series(float(cloud_cover), index=df.index).clip(0, 100)
 
     # Radiation attenuation — empirical linear approximation.
     # At 100% cloud cover, direct radiation drops by ~75%.

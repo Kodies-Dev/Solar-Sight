@@ -141,68 +141,68 @@ Content-Type: {{contentType}}
 
 ###
 
-### Test 16: POST /simulate - baseline (cloud_delta = 0)
+### Test 16: POST /simulate - clear sky (cloud_cover = 0)
 POST {{baseUrl}}/simulate HTTP/1.1
 Content-Type: {{contentType}}
 
 {
   "city": "Gliwice",
-  "cloud_delta": 0
+  "cloud_cover": 0
 }
 
 ###
 
-### Test 17: POST /simulate - more clouds (+30)
-POST {{baseUrl}}/simulate HTTP/1.1
-Content-Type: {{contentType}}
-
-{
-  "city": "Gliwice",
-  "cloud_delta": 30
-}
-
-###
-
-### Test 18: POST /simulate - fully clouded (+100)
+### Test 17: POST /simulate - partly cloudy (50)
 POST {{baseUrl}}/simulate HTTP/1.1
 Content-Type: {{contentType}}
 
 {
   "city": "Katowice",
-  "cloud_delta": 100
+  "cloud_cover": 0
 }
 
 ###
 
-### Test 19: POST /simulate - clearer sky (-50)
+### Test 18: POST /simulate - fully overcast (100)
 POST {{baseUrl}}/simulate HTTP/1.1
 Content-Type: {{contentType}}
 
 {
   "city": "Katowice",
-  "cloud_delta": -50
+  "cloud_cover": 100
 }
 
 ###
 
-### Test 20: POST /simulate - invalid cloud_delta (expect 400)
+### Test 19: POST /simulate - light clouds (25)
+POST {{baseUrl}}/simulate HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Katowice",
+  "cloud_cover": 25
+}
+
+###
+
+### Test 20: POST /simulate - out of range (expect 400)
 POST {{baseUrl}}/simulate HTTP/1.1
 Content-Type: {{contentType}}
 
 {
   "city": "Gliwice",
-  "cloud_delta": 250
+  "cloud_cover": 150
 }
 
 ###
 
-### Test 21: POST /simulate - non-numeric cloud_delta (expect 400)
+### Test 21: POST /simulate - non-numeric cloud_cover (expect 400)
 POST {{baseUrl}}/simulate HTTP/1.1
 Content-Type: {{contentType}}
 
 {
   "city": "Gliwice",
-  "cloud_delta": "a lot"
+  "cloud_cover": "a lot"
 }
 
 ###
