@@ -10,3 +10,4 @@ urllib3
 python-dotenv
 joblib
 flask
+flask-cors

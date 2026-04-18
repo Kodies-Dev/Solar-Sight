@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import json
 import logging
 import pandas as pd
@@ -17,6 +18,7 @@ logging.basicConfig(
 )
 
 app = Flask(__name__)
+CORS(app)
 
 # Pre-load model at startup — first request doesn't pay the joblib.load() cost
 try:
@@ -90,4 +92,4 @@ def analyze():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)

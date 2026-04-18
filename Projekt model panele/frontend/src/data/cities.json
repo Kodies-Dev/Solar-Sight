@@ -1,0 +1,55 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [18.6714, 50.2945] },
+            "properties": { "id": "gliwice", "name": "Gliwice" }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [19.0238, 50.2649] },
+            "properties": { "id": "katowice", "name": "Katowice" }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [19.9450, 50.0647] },
+            "properties": { "id": "krakow", "name": "Kraków" }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [17.0385, 51.1079] },
+            "properties": { "id": "wroclaw", "name": "Wrocław" }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [17.9213, 50.6751] },
+            "properties": { "id": "opole", "name": "Opole" }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [19.1203, 50.8118] },
+            "properties": { "id": "czestochowa", "name": "Częstochowa" }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [19.1041, 50.2863] },
+            "properties": { "id": "sosnowiec", "name": "Sosnowiec" }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [19.0584, 49.8224] },
+            "properties": { "id": "bielsko-biala", "name": "Bielsko-Biała" }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [18.9765, 50.1354] },
+            "properties": { "id": "tychy", "name": "Tychy" }
+        },
+        {
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [19.2748, 50.2050] },
+            "properties": { "id": "jaworzno", "name": "Jaworzno" }
+        }
+    ]
+}
