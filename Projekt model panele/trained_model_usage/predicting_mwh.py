@@ -31,9 +31,7 @@ def predykuj():
     })
 
 
-    print(wyniki.to_string())
-    print(f"\nSuma: {predykcja.sum():.1f} MWh")
-    print(f"Szczyt: {predykcja.max():.1f} MWh o godz {df['hour'].iloc[predykcja.argmax()]:02d}:00")
 
+    wyniki.sort_values(by='hour', ascending=True, inplace=True)
     return wyniki
 
