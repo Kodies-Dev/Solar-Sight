@@ -1,13 +1,13 @@
-### Zmienne
+### Variables
 @baseUrl = http://localhost:5000
 @contentType = application/json
 
-### Test 1: GET / - Status serwera
+### Test 1: GET / - Server status
 GET {{baseUrl}}/ HTTP/1.1
 
 ###
 
-### Test 2: POST /analyze - Pobierz predykcje
+### Test 2: POST /analyze - Default city (Gliwice)
 POST {{baseUrl}}/analyze HTTP/1.1
 Content-Type: {{contentType}}
 
@@ -15,14 +15,128 @@ Content-Type: {{contentType}}
 
 ###
 
-### Test 3: POST /analyze - Pobierz predykcje z parametrami
+### Test 3: POST /analyze - Gliwice
 POST {{baseUrl}}/analyze HTTP/1.1
 Content-Type: {{contentType}}
 
 {
-  "city": "Gliwice",
-  "start_date": "2023-01-01",
-  "end_date": "2023-12-31"
+  "city": "Gliwice"
+}
+
+###
+
+### Test 4: POST /analyze - Katowice
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Katowice"
+}
+
+###
+
+### Test 5: POST /analyze - Kraków
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Kraków"
+}
+
+###
+
+### Test 6: POST /analyze - Wrocław
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Wrocław"
+}
+
+###
+
+### Test 7: POST /analyze - Opole
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Opole"
+}
+
+###
+
+### Test 8: POST /analyze - Częstochowa
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Częstochowa"
+}
+
+###
+
+### Test 9: POST /analyze - Sosnowiec
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Sosnowiec"
+}
+
+###
+
+### Test 10: POST /analyze - Bielsko-Biała
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Bielsko-Biała"
+}
+
+###
+
+### Test 11: POST /analyze - Tychy
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Tychy"
+}
+
+###
+
+### Test 12: POST /analyze - Jaworzno
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Jaworzno"
+}
+
+###
+
+### Test 13: POST /analyze - city via query string
+POST {{baseUrl}}/analyze?city=Katowice HTTP/1.1
+Content-Type: {{contentType}}
+
+###
+
+### Test 14: POST /analyze - unknown city (expect 400)
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": "Atlantis"
+}
+
+###
+
+### Test 15: POST /analyze - empty city (expect 400)
+POST {{baseUrl}}/analyze HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+  "city": ""
 }
 
 ###

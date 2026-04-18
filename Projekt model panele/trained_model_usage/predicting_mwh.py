@@ -2,16 +2,26 @@ import joblib
 import pandas as pd
 import numpy as np
 import os
-import sys
+import logging
 import requests
+from functools import lru_cache
 from datetime import datetime, timedelta, timezone
 
 
+logger = logging.getLogger(__name__)
 
 
 FOLDER_SKRYPTU = os.path.dirname(os.path.abspath(__file__))
 PATH_MODEL     = os.path.join(FOLDER_SKRYPTU, '..', 'artifacts', 'model_bez_lagow.joblib')
 PATH_CITIES    = os.path.join(FOLDER_SKRYPTU, '..', 'pipeline', 'miasta.csv')
+
+
+@lru_cache(maxsize=1)
+def _get_model():
+    if not os.path.exists(PATH_MODEL):
+        raise FileNotFoundError(f"Model not found: {PATH_MODEL}")
+    logger.info("Loading model from %s", PATH_MODEL)
+    return joblib.load(PATH_MODEL)
 
 
 
@@ -66,8 +76,7 @@ def _fetch_forecast(lat: float, lon: float, hours: int = 24) -> pd.DataFrame:
 
     r = requests.get("https://api.open-meteo.com/v1/forecast", params=params, timeout=30)
     if r.status_code != 200:
-        print(f"BŁĄD API {r.status_code}: {r.text[:300]}")
-        sys.exit(1)
+        raise RuntimeError(f"Open-Meteo API error {r.status_code}: {r.text[:300]}")
 
     hourly = r.json().get("hourly", {})
     ts_utc = pd.Series(pd.to_datetime(hourly.get("time", []), utc=True))
@@ -86,20 +95,20 @@ def _fetch_forecast(lat: float, lon: float, hours: int = 24) -> pd.DataFrame:
         "sunshine_duration_s":     hourly.get("sunshine_duration"),
     })
 
-    # sunshine sekundy
+    # sunshine seconds
     df["sunshine_pct"] = (df["sunshine_duration_s"] / 3600 * 100).clip(0, 100).round(1)
     df.drop(columns=["sunshine_duration_s"], inplace=True)
 
-    # uzupełnij NaN w UV (noc)
+    # fill NaN in UV (night)
     df["uv_index"] = df["uv_index"].fillna(0.0).round(2)
 
-    # kolumny czasowe
+    # time columns
     df["date"]        = ts_utc.dt.strftime("%Y-%m-%d")
     df["hour"]        = ts_utc.dt.hour.astype(int)
     df["day_of_year"] = ts_utc.dt.dayofyear.astype(int)
     df["month"]       = ts_utc.dt.month.astype(int)
 
-    # kodowanie cykliczne
+    # cyclical encoding
     df["hour_sin"] = np.round(np.sin(2 * np.pi * df["hour"] / 24), 4)
     df["hour_cos"] = np.round(np.cos(2 * np.pi * df["hour"] / 24), 4)
     df["doy_sin"]  = np.round(np.sin(2 * np.pi * df["day_of_year"] / 365), 4)
@@ -121,53 +130,47 @@ def _fetch_forecast(lat: float, lon: float, hours: int = 24) -> pd.DataFrame:
 
 def predykuj(city: str = "gliwice") -> pd.DataFrame:
 
-
-
     cities = _load_cities()
     city_key = city.lower()
 
     if city_key not in cities:
-        dostepne = [c.capitalize() for c in cities.keys()]
-        raise ValueError(f"Nieznane miasto '{city}'. Dostępne: {dostepne}")
+        available = [c.capitalize() for c in cities.keys()]
+        raise ValueError(f"Unknown city '{city}'. Available: {available}")
 
     lat = cities[city_key]['lat']
     lon = cities[city_key]['lon']
 
-    print(f"Miasto: {city.capitalize()} ({lat}, {lon})")
+    logger.info("City: %s (%s, %s)", city.capitalize(), lat, lon)
 
-    # sprawdź model
-    if not os.path.exists(PATH_MODEL):
-        raise FileNotFoundError(f"Nie znaleziono modelu: {PATH_MODEL}")
+    # load model (cached)
+    model = _get_model()
 
-    # pobierz dane pogodowe
-    print("Pobieram prognozę pogodową...")
+    # fetch weather forecast
+    logger.info("Fetching weather forecast...")
     df = _fetch_forecast(lat, lon, hours=24)
-    print(f"Pobrano {len(df)} godzin danych")
+    logger.info("Retrieved %d hours of data", len(df))
 
-    # załaduj model
-    model = joblib.load(PATH_MODEL)
-
-    # uzupełnij brakujące kolumny
+    # fill missing columns
     required_features = list(model.feature_names_in_)
     for col in required_features:
         if col not in df.columns:
-            print(f"UWAGA: brakuje '{col}' — uzupełniam zerami")
+            logger.warning("Missing column '%s' — filling with zeros", col)
             df[col] = 0.0
 
     X = df[required_features]
 
-    # predykcja
-    predykcja = model.predict(X)
-    predykcja = np.maximum(0, predykcja).round(3)
+    # prediction
+    prediction = model.predict(X)
+    prediction = np.maximum(0, prediction).round(3)
 
-    wyniki = pd.DataFrame({
+    results = pd.DataFrame({
         'timestamp':     df['timestamp'],
         'hour':          df['hour'],
-        'predykcja_mwh': predykcja
+        'predykcja_mwh': prediction
     })
 
-    wyniki.sort_values(by='hour', ascending=True, inplace=True)
+    results.sort_values(by='hour', ascending=True, inplace=True)
 
-    return wyniki
+    return results
 
 
