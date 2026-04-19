@@ -1,44 +1,31 @@
-import { Modal } from '@mantine/core'
+import { Title, Text } from '@mantine/core'
 import PredictionModalStats from '../PredictionModalStats/PredictionModalStats'
 import PredictionModalChart from '../PredictionModalChart/PredictionModalChart'
+import PredictionWeatherForecast from '../PredictionWeatherForecast/PredictionWeatherForecast'
 import styles from './PredictionModal.module.css'
 
-function PredictionModal({ city, onClose }) {
+function PredictionModal({ city }) {
   const time = new Date().toLocaleString('pl-PL', {
-    hour: '2-digit',
-    minute: '2-digit',
+    weekday: 'long',
     day: 'numeric',
-    month: 'long'
+    month: 'long',
+    year: 'numeric',
   })
 
   return (
-    <Modal
-      opened={!!city}
-      onClose={onClose}
-      title={
-        <div>
-          <p className={styles.title}>{ city?.name }</p>
-          <p className={styles.time}>{ time }</p>
-        </div>
-      }
-      centered
-      size="lg"
-      styles={{
-        header: {
-          alignItems: 'flex-start',
-        },
-        close: {
-          marginTop: '0px',
-        }
-      }}
-    >
+    <div className={styles.sidebar}>
       {city && (
-        <>
+        <div className={styles.content}>
+          <div className={styles.header}>
+            <Title order={1}>{ city.name }</Title>
+            <Text size="lg">{ time }</Text>
+          </div>
           <PredictionModalStats city={city} />
           <PredictionModalChart city={city} />
-        </>
+          <PredictionWeatherForecast city={city} />
+        </div>
       )}
-    </Modal>
+    </div>
   )
 }
 

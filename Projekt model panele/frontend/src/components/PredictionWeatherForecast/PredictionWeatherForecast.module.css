@@ -1,0 +1,17 @@
+.strip {
+    margin-top: 15px;
+    display: flex;
+    gap: 6px;
+}
+
+.slot {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    padding: 8px 4px;
+}
