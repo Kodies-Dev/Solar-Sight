@@ -9,6 +9,7 @@
     padding: 12px;
     background: rgb(248, 2, 124) !important;
     border: none !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
 }
 
 .statsLabel {

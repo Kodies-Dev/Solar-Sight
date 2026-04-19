@@ -1,4 +1,4 @@
-import { Title, Text } from '@mantine/core'
+import { Title, Text, Slider } from '@mantine/core'
 import PredictionModalStats from '../PredictionModalStats/PredictionModalStats'
 import PredictionModalChart from '../PredictionModalChart/PredictionModalChart'
 import PredictionWeatherForecast from '../PredictionWeatherForecast/PredictionWeatherForecast'
@@ -14,11 +14,14 @@ function PredictionModal({ city }) {
 
   return (
     <div className={styles.sidebar}>
+      <div className={styles.blob1} />
+      <div className={styles.blob2} />
+      <div className={styles.blob3} />
       {city && (
         <div className={styles.content}>
           <div className={styles.header}>
             <Title order={1}>{ city.name }</Title>
-            <Text size="lg">{ time }</Text>
+            <Text size="md" tt="uppercase" fw={500}>{time} · godz. {new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}</Text>
           </div>
           <PredictionModalStats city={city} />
           <PredictionModalChart city={city} />

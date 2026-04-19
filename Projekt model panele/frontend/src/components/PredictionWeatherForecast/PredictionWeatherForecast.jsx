@@ -10,7 +10,7 @@ function PredictionWeatherForecast({ city }) {
 
   return (
     <Stack gap="xs">
-      <Text size="lg">POGODA GODZINOWA</Text>
+      <Text size="md" fw={500}>POGODA GODZINOWA</Text>
       <div className={styles.strip}>
         {slots.map(d => (
           <div key={d.hour} className={styles.slot}>
