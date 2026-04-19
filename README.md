@@ -1,4 +1,4 @@
-# SolarSight
+# ☀️👁️SolarSight
 Team: Jakub Bodzioch, Kajetan Hołdan, Igor Kotlarz, Kamil Musioł, Jan Piechota, Łukasz Wolf
 
 **ETHSilesia / Tauron AI Hackathon 2026 — Team SolarSight**
