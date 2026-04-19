@@ -15,15 +15,23 @@ useEffect(() => {
 
   mapRef.current = new mapboxgl.Map({
     container: mapContainerRef.current,
-    style: 'mapbox://styles/mapbox/standard',
+    style: 'mapbox://styles/mapbox/light-v11',
     center: [18.67796034218694, 50.28883369377393],
     zoom: 8,
     minZoom: 6,
     maxBounds: [
       [13.8, 48.9],
       [24.2, 55.0]
-    ]
+    ],
+    attributionControl: false
   })
+
+  mapRef.current.addControl(
+    new mapboxgl.AttributionControl({
+      compact: true
+    }),
+    'bottom-right'
+  );
 
   mapRef.current.on('load', () => {
     mapRef.current.addSource('cities', {
@@ -39,7 +47,7 @@ useEffect(() => {
         'circle-radius': 20,
         'circle-color': '#f8027c',
         'circle-opacity': 0.2,
-        'circle-blur': 1,
+        'circle-blur': 2,
       }
     })
 

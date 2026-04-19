@@ -3,7 +3,7 @@
     "features": [
         {
             "type": "Feature",
-            "geometry": { "type": "Point", "coordinates": [18.6714, 50.2945] },
+            "geometry": { "type": "Point", "coordinates": [18.666435170117047, 50.2970571895538] },
             "properties": { "id": "gliwice", "name": "Gliwice" }
         },
         {
@@ -18,22 +18,22 @@
         },
         {
             "type": "Feature",
-            "geometry": { "type": "Point", "coordinates": [17.0385, 51.1079] },
+            "geometry": { "type": "Point", "coordinates": [17.033723441858175, 51.12839816512086] },
             "properties": { "id": "wroclaw", "name": "Wrocław" }
         },
         {
             "type": "Feature",
-            "geometry": { "type": "Point", "coordinates": [17.9213, 50.6751] },
+            "geometry": { "type": "Point", "coordinates": [17.922928975497996, 50.67313759349895] },
             "properties": { "id": "opole", "name": "Opole" }
         },
         {
             "type": "Feature",
-            "geometry": { "type": "Point", "coordinates": [19.1203, 50.8118] },
+            "geometry": { "type": "Point", "coordinates": [19.11550552897104, 50.83622707297089] },
             "properties": { "id": "czestochowa", "name": "Częstochowa" }
         },
         {
             "type": "Feature",
-            "geometry": { "type": "Point", "coordinates": [19.1041, 50.2863] },
+            "geometry": { "type": "Point", "coordinates": [19.133326578958783, 50.28507006975417] },
             "properties": { "id": "sosnowiec", "name": "Sosnowiec" }
         },
         {
@@ -43,7 +43,7 @@
         },
         {
             "type": "Feature",
-            "geometry": { "type": "Point", "coordinates": [18.9765, 50.1354] },
+            "geometry": { "type": "Point", "coordinates": [19.003379888328208, 50.1233484368691] },
             "properties": { "id": "tychy", "name": "Tychy" }
         },
         {

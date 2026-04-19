@@ -2,23 +2,24 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 40px;
 }
 
 .statsCard {
     padding: 12px;
-    background: #f8027c !important;
+    background: rgb(248, 2, 124) !important;
     border: none !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
 }
 
 .statsLabel {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
     margin-bottom: 4px;
 }
 
 .statsValue {
-    font-size: 17px;
-    font-weight: 500;
+    font-size: 18px;
+    font-weight: 800 !important;
     color: #ffffff;
 }

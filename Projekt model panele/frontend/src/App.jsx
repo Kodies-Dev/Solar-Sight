@@ -1,15 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Map from './components/Map/Map'
 import PredictionModal from './components/PredictionModal/PredictionModal'
 
 function App() {
   const [selectedCity, setSelectedCity] = useState(null);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
-  const handleCityClick = async (city) => {
+  const fetchCity = async (city) => {
     setLoading(true);
-    console.log('wysyłam city:', city.id)
     try {
       const { data } = await axios.post('http://localhost:5001/analyze', {
         city: city.name
@@ -26,16 +25,18 @@ function App() {
     }
   }
 
-  const handleClose = () => {
-    setSelectedCity(null);
+  useEffect(() => {
+    fetchCity({id: 'gliwice', name: 'Gliwice'})
+  }, [])
+
+  const handleCityClick = async (city) => {
+    fetchCity(city);
   }
 
   return (
     <>
       <Map onCityClick={handleCityClick} />
-      {selectedCity && (
-        <PredictionModal city={selectedCity} onClose={handleClose} />
-      )}
+      <PredictionModal city={selectedCity} />
     </>
   )
 }
