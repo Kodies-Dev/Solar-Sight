@@ -27,7 +27,7 @@ function PredictionModalChart({ city }) {
 
   return (
     <div>
-      <Text size="md" fw={500}>PRODUKCJA GODZINOWA (MWh)</Text>
+      <Text size="md" fw={500}>ROZKŁAD GODZINOWY PRODUKCJI (MWh)</Text>
       <div className={styles.chartContainer}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={city.forecast} barCategoryGap="10%">
