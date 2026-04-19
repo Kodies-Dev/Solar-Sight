@@ -19,6 +19,7 @@ Team: Jakub Bodzioch, Kajetan Hołdan, Igor Kotlarz, Kamil Musioł, Jan Piechota
 - `Projekt model panele/` - model, pipeline danych, frontend i backend
 - `LICENSE` - GNU General Public License v3.0
 - `SOURCE.txt` - informacja o pochodzeniu projektu
+- `SolarSight.pptx` - prezentacja projektu (zrzuty ekranu)
 
 ## Źródła danych
 
