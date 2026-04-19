@@ -1,4 +1,5 @@
 # SolarSight
+Team: Jakub Bodzioch, Kajetan Hołdan, Igor Kotlarz, Kamil Musioł, Jan Piechota, Łukasz Wolf
 
 **ETHSilesia / Tauron AI Hackathon 2026 — Team SolarSight**
 
@@ -27,6 +28,9 @@ Wszystkie wykorzystane źródła danych są publiczne i bezpłatne:
 - [ENTSO-E](https://transparency.entsoe.eu) via [instrat.pl](https://energy-api.instrat.pl) - krajowa produkcja PV
 - [URE](https://www.ure.gov.pl) - moc zainstalowana fotowoltaiki w Polsce (dane miesięczne)
 - [Google Weather API](https://developers.google.com/maps/documentation/weather) - prognoza pogodowa (wymaga klucza API)
+
+## Demo
+[Video presentation](TUTAJ_WKLEJ_LINK_YOUTUBE)
 
 ## License
 
