@@ -30,7 +30,7 @@ Wszystkie wykorzystane źródła danych są publiczne i bezpłatne:
 - [Google Weather API](https://developers.google.com/maps/documentation/weather) - prognoza pogodowa (wymaga klucza API)
 
 ## Demo
-[Video presentation](LINK)
+[Video presentation](https://youtu.be/C_B6lFZmzMw)
 
 ## License
 
