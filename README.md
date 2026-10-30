@@ -66,7 +66,7 @@ Click a city on the map to get the full forecast in one panel: total predicted p
 
 **🧪 Honest validation.** Hyperparameters were tuned with **Optuna** (100 trials), each scored by **5-fold `TimeSeriesSplit`** with 30-day test windows and a **24-hour gap** between train and test. The model never peeks at tomorrow.
 
-**🚫 Lag-free on purpose.** An earlier variant with lagged production features reported R² 0.987. Those lags don't exist when you forecast 24 hours ahead from weather alone, so the deployed model (`model_bez_lagow`, "no lags") drops them and takes the honest hit:
+**🚫 Lag-free on purpose.** An earlier variant with lagged production features reported R² 0.987. Those lags don't exist when you forecast 24 hours ahead from weather alone, so the deployed model (`models/pv_xgb_no_lags.joblib`) drops them and takes the honest hit:
 
 | Deployed model · chronological 80/20 hold-out | |
 |---|---|
@@ -93,20 +93,19 @@ Click a city on the map to get the full forecast in one panel: total predicted p
 
 Gliwice · Katowice · Kraków · Wrocław · Opole · Częstochowa · Sosnowiec · Bielsko-Biała · Tychy · Jaworzno
 
-National production is scaled to city level by population share. To add a city, append one row (`name, lat, lon, population`) to `pipeline/miasta.csv`.
+National production is scaled to city level by population share. To add a city, append one row (`name, lat, lon, population`) to `data/cities.csv` (and a marker to `frontend/src/data/cities.json`).
 
 ## 🚀 Run it
 
 ```bash
-cd "Projekt model panele"
-pip install -r requirements.txt
+pip install -e .            # installs the solarsight package and its dependencies
 
 # backend → http://localhost:5001
-python backend/server.py
+python backend/app.py
 
 # frontend (needs a Mapbox token)
 cd frontend
-echo "VITE_MAPBOX_ACCESS_TOKEN=pk.your_token" > .env
+cp .env.example .env        # set VITE_MAPBOX_ACCESS_TOKEN
 npm install && npm run dev
 ```
 
@@ -115,19 +114,27 @@ curl -X POST localhost:5001/analyze  -H "Content-Type: application/json" -d '{"c
 curl -X POST localhost:5001/simulate -H "Content-Type: application/json" -d '{"city": "Gliwice", "cloud_cover": 100}'
 ```
 
-More requests, including the error cases, are in [`backend/test.rest`](Projekt%20model%20panele/backend/test.rest). Retraining and the data pipeline are described in the [technical README](Projekt%20model%20panele/README.md).
+More requests, including the error cases, are in [`backend/api_requests.http`](backend/api_requests.http). Rebuilding the dataset, retraining and the forecast pipeline are described in the [technical notes](docs/technical_notes.md).
 
 ## 🗂️ Repository
 
-| Path | What's inside |
-|---|---|
-| `Projekt model panele/pipeline/` | data collection: weather, PV production, capacity, merge |
-| `Projekt model panele/forecast/` | forecast-input builders (Open-Meteo + Google Weather) |
-| `Projekt model panele/main_model.ipynb` | training, Optuna tuning, evaluation, SHAP |
-| `Projekt model panele/trained_model_usage/` | inference and the what-if simulation |
-| `Projekt model panele/backend/` | Flask API + REST test suite |
-| `Projekt model panele/frontend/` | React + Mapbox dashboard |
-| `SolarSight.pptx` | pitch deck |
+```
+solarsight/                 Python package
+├── config.py               paths and constants
+├── geo.py                  city registry, solar elevation (NOAA)
+├── features.py             cyclic time features
+├── capacity.py             installed PV capacity in Poland
+├── ingest/                 training data: weather history, PV production, dataset builder
+├── forecast/               forecast inputs: Open-Meteo, Google Weather, merge
+└── inference.py            predict() and simulate() used by the API
+backend/                    Flask API + REST request collection
+frontend/                   React + Mapbox dashboard
+data/                       cities.csv, processed/ training dataset
+models/                     trained XGBoost model
+notebooks/                  01_eda · 02_train_model · 03_prediction_check
+docs/                       technical notes, README assets
+SolarSight.pptx             pitch deck
+```
 
 ## 📡 Data sources
 

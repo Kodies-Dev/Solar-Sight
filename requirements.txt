@@ -1,0 +1,19 @@
+# Runtime (also declared in pyproject.toml)
+pandas
+numpy
+requests
+urllib3
+python-dotenv
+joblib
+xgboost
+scikit-learn
+flask
+flask-cors
+
+# Notebooks: training, tuning, explainability, EDA
+optuna
+shap
+seaborn
+matplotlib
+statsmodels
+jupyter
