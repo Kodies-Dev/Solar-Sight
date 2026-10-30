@@ -1,0 +1,25 @@
+# Environment and secrets
+.env
+.venv/
+venv/
+
+# Generated data (recreated by the pipelines)
+data/raw/
+data/forecast/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+.claude/

@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "solarsight"
+version = "1.1.0"
+description = "24-hour-ahead solar PV production forecasts for Silesian cities"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "pandas",
+    "numpy",
+    "requests",
+    "urllib3",
+    "python-dotenv",
+    "joblib",
+    "xgboost",
+    "scikit-learn",
+    "flask",
+    "flask-cors",
+]
+
+[project.optional-dependencies]
+notebooks = ["optuna", "shap", "seaborn", "matplotlib", "statsmodels", "jupyter"]
+
+[tool.setuptools.packages.find]
+include = ["solarsight*"]
